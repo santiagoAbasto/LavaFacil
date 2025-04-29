@@ -1,6 +1,7 @@
 import { useForm, Head } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import Swal from 'sweetalert2'; // 👈 Importamos SweetAlert2
+import Swal from 'sweetalert2';
+import { motion } from 'framer-motion'; // 🎯 Importamos Framer Motion para animaciones
 
 export default function CrearPedido({ servicios }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -31,19 +32,17 @@ export default function CrearPedido({ servicios }) {
         e.preventDefault();
         post(route('cliente.pedido.store'), {
             onSuccess: () => {
-                // 🎉 Alerta SweetAlert2 al éxito
                 Swal.fire({
-                    title: '¡Pedido registrado!',
+                    title: '✅ Pedido registrado',
                     text: 'Tu pedido fue registrado exitosamente.',
                     icon: 'success',
-                    confirmButtonText: 'OK',
-                    confirmButtonColor: '#3085d6',
+                    confirmButtonColor: '#6366f1', // Indigo elegante
+                    background: '#f9fafb',
+                    color: '#374151',
+                    timer: 2000,
+                    showConfirmButton: false,
                 });
-
-                reset(); // 🔵 Limpia el formulario después de registrar
-            },
-            onError: () => {
-                // (Opcional) Podrías mostrar error en SweetAlert si quieres
+                reset();
             }
         });
     };
@@ -61,60 +60,75 @@ export default function CrearPedido({ servicios }) {
     }, [data.servicios, servicios]);
 
     return (
-        <div className="p-6 max-w-4xl mx-auto">
+        <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="p-8 max-w-4xl mx-auto"
+        >
             <Head title="Crear Pedido" />
-            <h1 className="text-2xl font-bold mb-6">Registrar nuevo pedido</h1>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="mb-8 text-center">
+                <h1 className="text-4xl font-extrabold text-zinc-800 dark:text-white mb-2">Crear Pedido</h1>
+                <p className="text-zinc-500 dark:text-zinc-400">
+                    Completa el formulario para registrar tu pedido.
+                </p>
+            </div>
 
+            <form onSubmit={handleSubmit} className="space-y-8 bg-white/70 dark:bg-zinc-900/60 backdrop-blur-md p-8 rounded-3xl shadow-lg border border-zinc-200 dark:border-zinc-700 transition-all">
+                
                 {/* Fecha de recojo */}
-                <div>
-                    <label className="block text-sm font-medium mb-1">Fecha de recojo:</label>
-                    <input 
-                        type="date" 
-                        className="border rounded px-3 py-2 w-full"
+                <div className="space-y-2">
+                    <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-300">Fecha de Recojo:</label>
+                    <input
+                        type="date"
+                        className="w-full py-2 px-4 rounded-lg bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 focus:ring-2 focus:ring-indigo-400 focus:outline-none transition"
                         value={data.fecha_recojo}
                         onChange={(e) => setData('fecha_recojo', e.target.value)}
                     />
                     {errors.fecha_recojo && (
-                        <div className="text-red-500 text-sm mt-1">{errors.fecha_recojo}</div>
+                        <p className="text-red-500 text-sm">{errors.fecha_recojo}</p>
                     )}
                 </div>
 
                 {/* Servicios */}
-                <div>
-                    <h2 className="text-lg font-semibold mb-2">Selecciona los servicios:</h2>
-                    {servicios.map(servicio => (
-                        <div key={servicio.id} className="flex items-center mb-2 gap-4">
-                            <input
-                                type="checkbox"
-                                checked={data.servicios.some(s => s.id === servicio.id)}
-                                onChange={() => toggleServicio(servicio.id)}
-                            />
-                            <span>{servicio.nombre} - Bs {servicio.precio}</span>
-                            {data.servicios.some(s => s.id === servicio.id) && (
+                <div className="space-y-4">
+                    <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-200">Selecciona los Servicios:</h2>
+                    <div className="space-y-3">
+                        {servicios.map(servicio => (
+                            <div key={servicio.id} className="flex items-center gap-4">
                                 <input
-                                    type="number"
-                                    min="1"
-                                    className="w-20 border rounded px-2 py-1"
-                                    value={data.servicios.find(s => s.id === servicio.id)?.cantidad || 1}
-                                    onChange={(e) => actualizarCantidad(servicio.id, parseInt(e.target.value))}
+                                    type="checkbox"
+                                    checked={data.servicios.some(s => s.id === servicio.id)}
+                                    onChange={() => toggleServicio(servicio.id)}
+                                    className="rounded text-indigo-600 focus:ring-indigo-400"
                                 />
-                            )}
-                        </div>
-                    ))}
+                                <span className="text-zinc-700 dark:text-zinc-300">{servicio.nombre} - Bs {servicio.precio}</span>
+
+                                {data.servicios.some(s => s.id === servicio.id) && (
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        className="w-20 py-1 px-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-center"
+                                        value={data.servicios.find(s => s.id === servicio.id)?.cantidad || 1}
+                                        onChange={(e) => actualizarCantidad(servicio.id, parseInt(e.target.value))}
+                                    />
+                                )}
+                            </div>
+                        ))}
+                    </div>
                     {errors.servicios && (
-                        <div className="text-red-500 text-sm mt-1">{errors.servicios}</div>
+                        <p className="text-red-500 text-sm">{errors.servicios}</p>
                     )}
                 </div>
 
                 {/* Método de pago */}
-                <div>
-                    <label className="block text-sm font-medium mb-1">Método de pago:</label>
+                <div className="space-y-2">
+                    <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-300">Método de Pago:</label>
                     <select
-                        className="border rounded px-3 py-2 w-full"
                         value={data.metodo_pago}
                         onChange={(e) => setData('metodo_pago', e.target.value)}
+                        className="w-full py-2 px-4 rounded-lg bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 focus:ring-2 focus:ring-indigo-400 focus:outline-none transition"
                     >
                         <option value="">-- Selecciona método --</option>
                         <option value="efectivo">Efectivo</option>
@@ -122,33 +136,35 @@ export default function CrearPedido({ servicios }) {
                         <option value="transferencia">Transferencia</option>
                     </select>
                     {errors.metodo_pago && (
-                        <div className="text-red-500 text-sm mt-1">{errors.metodo_pago}</div>
+                        <p className="text-red-500 text-sm">{errors.metodo_pago}</p>
                     )}
                 </div>
 
-                {/* Monto Calculado */}
-                <div>
-                    <label className="block text-sm font-medium mb-1">Monto a pagar:</label>
+                {/* Monto a pagar */}
+                <div className="space-y-2">
+                    <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-300">Monto a pagar:</label>
                     <input
                         type="number"
-                        className="border rounded px-3 py-2 w-full bg-gray-100"
                         value={montoCalculado}
                         disabled
+                        className="w-full py-2 px-4 rounded-lg bg-gray-100 dark:bg-zinc-700 text-zinc-700 dark:text-white border border-zinc-300 dark:border-zinc-700 text-center"
                     />
                 </div>
 
-                {/* Botón de enviar */}
+                {/* Botón enviar */}
                 <div className="flex justify-end">
-                    <button 
-                        type="submit" 
-                        disabled={processing} 
-                        className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded"
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        type="submit"
+                        disabled={processing}
+                        className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition disabled:opacity-50"
                     >
-                        Confirmar pedido
-                    </button>
+                        {processing ? 'Registrando...' : 'Confirmar Pedido'}
+                    </motion.button>
                 </div>
 
             </form>
-        </div>
+        </motion.div>
     );
 }

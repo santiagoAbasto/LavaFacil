@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import ThemeToggle from '@/Components/ThemeToggle'; // ✅ import del botón
+import ThemeToggle from '@/Components/ThemeToggle';
 
 export default function DashboardLayout({ children }) {
     const { auth, csrf_token } = usePage().props;
@@ -14,13 +14,15 @@ export default function DashboardLayout({ children }) {
 
     const menuAdmin = [
         { name: 'Gestionar Pedidos', href: route('admin.pedidos') },
+        { name: 'Gestionar Clientes', href: route('admin.clientes') }, // ✅ Añadido
+        { name: 'Ver Reportes', href: route('admin.reportes') },       // ✅ Añadido
     ];
 
     const menu = rol === 'admin' ? menuAdmin : menuCliente;
 
     return (
         <div className="min-h-screen flex bg-gray-100 dark:bg-zinc-900 relative">
-            {/* ✅ Botón de cambio de tema arriba a la derecha */}
+            {/* Botón de tema */}
             <div className="absolute top-4 right-4 z-50">
                 <ThemeToggle />
             </div>
@@ -28,7 +30,7 @@ export default function DashboardLayout({ children }) {
             {/* Sidebar */}
             <aside className="w-64 bg-white dark:bg-zinc-800 border-r p-6 space-y-6 flex flex-col justify-between">
                 <div>
-                    <div className="text-2xl font-bold text-center mb-6 text-zinc-800 dark:text-white">
+                    <div className="text-2xl font-bold text-center mb-6 text-indigo-600 dark:text-indigo-400">
                         LavaFácil
                     </div>
 
@@ -43,7 +45,7 @@ export default function DashboardLayout({ children }) {
                             <Link
                                 key={idx}
                                 href={item.href}
-                                className="block py-2 px-3 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 font-medium text-zinc-800 dark:text-zinc-100"
+                                className="block py-2 px-3 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 font-medium text-zinc-800 dark:text-zinc-100 transition"
                             >
                                 {item.name}
                             </Link>

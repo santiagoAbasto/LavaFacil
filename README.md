@@ -1,61 +1,216 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+<p align="center"> <img src="public/images/logo-lavafacil.png" alt="LavaFácil Logo" width="200"/> </p>
+🧼 LavaFácil - Sistema de Gestión de Lavandería
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+📚 Tabla de Contenidos
 
-## About Laravel
+1. Descripción General
+2. ¿Qué Problema Resuelve LavaFácil?
+3. Tecnologías y Herramientas Utilizadas
+4. Arquitectura del Proyecto
+5. Instalación Completa Paso a Paso
+6. Configuración de Entorno .env
+7. Orquestación Docker Detallada
+8. Errores Comunes Documentados
+9. Funcionalidades por tipo de usuario
+10. Diseño UX/UI
+11. Implementación de Modo Oscuro
+12. Seguridad Aplicada
+13. Comandos Útiles para Desarrollo
+14. Mejoras Futuras Propuestas
+15. Glosario de Términos Técnicos
+16. Créditos y Agradecimientos
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+🧼 1. Descripción General
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+LavaFácil es un sistema integral para la administración de una lavandería. Permite gestionar clientes, pedidos, pagos, servicios ofrecidos y asignación de roles administrativos, todo a través de una aplicación web moderna, rápida y segura.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+🔥 2. ¿Qué Problema Resuelve LavaFácil?
 
-## Learning Laravel
+Agiliza la toma de pedidos y control de pagos.
+Permite al dueño ver el estado de pedidos de cada cliente.
+Centraliza la información para eliminar el uso de registros manuales o papel.
+Facilita la administración de servicios, precios y clientes de manera automática.
+Mejora la experiencia del cliente permitiendo visualizar el avance de su pedido.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+🚀 3. Tecnologías y Herramientas Utilizadas
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Herramienta	Uso Principal
+Laravel 12	Backend robusto en PHP
+React 18 + Inertia.js	Frontend SPA sin necesidad de API REST
+TailwindCSS	Estilos modernos, adaptativos y modo oscuro
+PostgreSQL 15	Base de datos relacional
+Docker + Docker Compose	Contenerización y despliegue
+Fortify	Seguridad y autenticación
+Vite	Compilador de assets súper rápido
 
-## Laravel Sponsors
+🏗️ 4. Arquitectura del Proyecto
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+lavafacil/
+├── app/                # Lógica de servidor (Controllers, Models, Middleware)
+├── database/           # Migraciones y Seeders
+├── resources/js/       # Código Frontend en React
+│   ├── Pages/          # Vistas principales
+│   ├── Components/     # Componentes reutilizables
+├── public/             # Recursos públicos (logo, favicon)
+├── docker/             # Configuración Nginx personalizada
+├── docker-compose.yml  # Orquestador de contenedores
+├── tailwind.config.js  # Configuración Tailwind
+└── vite.config.js      # Configuración Vite
+🛠️ 5. Instalación Completa Paso a Paso
 
-### Premium Partners
+# 1. Clonar repositorio
+git clone https://github.com/santiagoabasto/lavafacil.git
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development/)**
-- **[Active Logic](https://activelogic.com)**
+# 2. Ingresar a la carpeta
+cd lavafacil
 
-## Contributing
+# 3. Levantar contenedores con Docker
+docker-compose up -d --build
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# 4. Ingresar al contenedor PHP
+docker exec -it lavafacil_app bash
 
-## Code of Conduct
+# 5. Instalar dependencias PHP
+composer install
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# 6. Crear archivo .env
+cp .env.example .env
 
-## Security Vulnerabilities
+# 7. Generar clave de aplicación
+php artisan key:generate
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# 8. Ejecutar migraciones + seeders
+php artisan migrate:fresh --seed
 
-## License
+# 9. Instalar dependencias JS
+npm install
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# 10. Compilar Frontend
+npm run dev
+⚙️ 6. Configuración de Entorno .env
+
+Variables principales configuradas:
+
+
+Variable	Descripción
+DB_CONNECTION=pgsql	Tipo de base de datos
+DB_HOST=db	Nombre del servicio en Docker
+DB_PORT=5432	Puerto de conexión PostgreSQL
+DB_DATABASE=lavafacil	Nombre de la base
+DB_USERNAME=postgres	Usuario de DB
+DB_PASSWORD=secret	Contraseña de DB
+🐳 7. Orquestación Docker Detallada
+
+App: Laravel 12 en PHP-FPM 8.2 (lavafacil_app)
+DB: PostgreSQL 15 (lavafacil_db)
+Web server: Nginx alpine (lavafacil_web)
+Comunicación:
+
+Servicio	Accede a
+App	Base de datos mediante host db
+Web	Sirve contenido estático de /public
+Puertos expuestos:
+
+localhost:8000 → Nginx
+localhost:5432 → PostgreSQL
+
+🐞 8. Errores Comunes Documentados
+
+
+Error	Causa	Solución
+mv: cannot stat 'composer.phar'	Composer no descargado	Instalar composer manualmente
+could not translate host name "db" to address	Servicio DB no levantado a tiempo	Reiniciar docker-compose
+could not find driver (Connection: pgsql)	Falta extensión PHP PDO_PGSQL	Habilitar y reconstruir imagen
+relation "sessions" does not exist	Migraciones no corridas	php artisan migrate:fresh
+Target class [PedidoController] does not exist	Error en ruta/controller	Revisar imports correctos
+
+✨ 9. Funcionalidades por tipo de usuario
+
+Cliente:
+
+Registro y login
+Selección de servicios
+Generación de pedidos
+Consulta de pedidos
+Administrador:
+
+Gestión de pedidos
+Cambio de estado de pedidos
+Confirmación de pagos
+Visualización de ventas
+
+🎨 10. Diseño UX/UI
+
+Interfaz limpia y minimalista
+Enfoque mobile-first
+Animaciones suaves de carga
+Modo oscuro nativo
+Inputs y botones accesibles
+
+🌗 11. Implementación de Modo Oscuro
+
+Detecta automáticamente preferencias del sistema
+Alternancia manual tipo "Switch iOS"
+Persistencia en localStorage
+Clases dark: en TailwindCSS
+
+🔐 12. Seguridad Aplicada
+
+CSRF Tokens automáticos
+Middleware de verificación de autenticación
+Roles controlados mediante Middleware role
+Validaciones en frontend y backend
+Hash de contraseñas con Bcrypt
+
+🧪 13. Comandos Útiles para Desarrollo
+
+# Subir servicios
+docker-compose up -d
+
+# Bajar servicios
+docker-compose down
+
+# Acceder al contenedor App
+docker exec -it lavafacil_app bash
+
+# Migrar base de datos
+php artisan migrate:fresh --seed
+
+# Instalar dependencias PHP
+composer install
+
+# Instalar dependencias Frontend
+npm install
+
+# Compilar Frontend para desarrollo
+npm run dev
+
+# Compilar Frontend para producción
+npm run build
+
+🎯 14. Mejoras Futuras Propuestas
+
+Implementar notificaciones toast
+Subir imágenes asociadas a pedidos
+Convertir a PWA para modo offline
+Soporte multilenguaje (Español/Inglés)
+Dashboard analítico de ventas
+Integración con pagos online
+
+📚 15. Glosario de Términos Técnicos
+
+
+Término	Definición
+SPA	Aplicación de Página Única (Single Page Application)
+Inertia.js	Librería para combinar Laravel + React
+Middleware	Filtro entre solicitud y respuesta HTTP
+TailwindCSS	Framework CSS basado en utilidades
+Docker Compose	Orquestador de múltiples contenedores Docker
+Vite	Herramienta moderna para empaquetar Frontend
+
+🙌 16. Créditos y Agradecimientos
+
+Proyecto desarrollado por Santiago Abasto
+Última actualización: 29/04/2025
+Gracias a la comunidad de Laravel, React y Docker por las herramientas increíbles que hacen proyectos como este posibles. 🚀
