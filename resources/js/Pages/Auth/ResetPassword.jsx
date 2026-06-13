@@ -1,59 +1,33 @@
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, useForm } from '@inertiajs/react';
+import { motion } from 'framer-motion';
 
 export default function ResetPassword({ token, email }) {
-    const { data, setData, post, processing, errors, reset, setError, clearErrors } = useForm({
-        token: token,
-        email: email,
+    const { data, setData, post, processing, errors, reset } = useForm({
+        token,
+        email,
         password: '',
         password_confirmation: '',
     });
 
     const submit = (e) => {
         e.preventDefault();
-        post(route('password.store'), {
-            onFinish: () => reset('password', 'password_confirmation'),
-        });
-    };
-
-    // Funciones para validaciones en tiempo real
-    const validateEmail = (value) => {
-        if (!value.includes('@') || !value.includes('.')) {
-            setError('email', 'Ingresa un correo electrónico válido.');
-        } else {
-            clearErrors('email');
-        }
-        setData('email', value);
-    };
-
-    const validatePassword = (value) => {
-        if (value.length < 8) {
-            setError('password', 'La contraseña debe tener al menos 8 caracteres.');
-        } else {
-            clearErrors('password');
-        }
-        setData('password', value);
-    };
-
-    const validatePasswordConfirmation = (value) => {
-        if (value !== data.password) {
-            setError('password_confirmation', 'Las contraseñas no coinciden.');
-        } else {
-            clearErrors('password_confirmation');
-        }
-        setData('password_confirmation', value);
+        post(route('password.store'), { onFinish: () => reset('password', 'password_confirmation') });
     };
 
     return (
         <GuestLayout>
             <Head title="Restablecer contraseña" />
 
-            <form onSubmit={submit} className="space-y-6">
-                {/* Email */}
+            <div className="text-center mb-8">
+                <h1 className="text-2xl font-bold text-[var(--color-ink)]">Nueva contraseña</h1>
+                <p className="text-sm text-[var(--color-muted)] mt-1">Elige una contraseña segura</p>
+            </div>
+
+            <form onSubmit={submit} className="space-y-5">
                 <div>
                     <InputLabel htmlFor="email" value="Correo electrónico" />
                     <TextInput
@@ -61,15 +35,15 @@ export default function ResetPassword({ token, email }) {
                         type="email"
                         name="email"
                         value={data.email}
-                        className={`mt-1 block w-full ${errors.email ? 'border-red-500' : ''}`}
+                        className="mt-1.5"
+                        hasError={!!errors.email}
                         autoComplete="username"
-                        onChange={(e) => validateEmail(e.target.value)}
+                        onChange={(e) => setData('email', e.target.value)}
                         required
                     />
-                    <InputError message={errors.email} className="mt-2" />
+                    <InputError message={errors.email} className="mt-1.5" />
                 </div>
 
-                {/* Nueva contraseña */}
                 <div>
                     <InputLabel htmlFor="password" value="Nueva contraseña" />
                     <TextInput
@@ -77,37 +51,40 @@ export default function ResetPassword({ token, email }) {
                         type="password"
                         name="password"
                         value={data.password}
-                        className={`mt-1 block w-full ${errors.password ? 'border-red-500' : ''}`}
+                        className="mt-1.5"
+                        hasError={!!errors.password}
                         autoComplete="new-password"
                         isFocused
-                        onChange={(e) => validatePassword(e.target.value)}
+                        onChange={(e) => setData('password', e.target.value)}
                         required
                     />
-                    <InputError message={errors.password} className="mt-2" />
+                    <InputError message={errors.password} className="mt-1.5" />
                 </div>
 
-                {/* Confirmar nueva contraseña */}
                 <div>
                     <InputLabel htmlFor="password_confirmation" value="Confirmar nueva contraseña" />
                     <TextInput
-                        type="password"
                         id="password_confirmation"
+                        type="password"
                         name="password_confirmation"
                         value={data.password_confirmation}
-                        className={`mt-1 block w-full ${errors.password_confirmation ? 'border-red-500' : ''}`}
+                        className="mt-1.5"
+                        hasError={!!errors.password_confirmation}
                         autoComplete="new-password"
-                        onChange={(e) => validatePasswordConfirmation(e.target.value)}
+                        onChange={(e) => setData('password_confirmation', e.target.value)}
                         required
                     />
-                    <InputError message={errors.password_confirmation} className="mt-2" />
+                    <InputError message={errors.password_confirmation} className="mt-1.5" />
                 </div>
 
-                {/* Botón */}
-                <div className="flex items-center justify-end">
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Restablecer contraseña
-                    </PrimaryButton>
-                </div>
+                <motion.button
+                    type="submit"
+                    className="btn-primary w-full"
+                    disabled={processing}
+                    whileTap={{ scale: 0.97 }}
+                >
+                    {processing ? 'Restableciendo…' : 'Restablecer contraseña'}
+                </motion.button>
             </form>
         </GuestLayout>
     );

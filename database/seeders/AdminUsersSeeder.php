@@ -10,19 +10,19 @@ class AdminUsersSeeder extends Seeder
 {
     public function run(): void
     {
-        $admins = [
-            ['name' => 'Santy', 'email' => 'santy19abasto@gmail.com', 'password' => 'admin123'],
-            ['name' => 'Deimar', 'email' => 'deimaralexr@gmail.com', 'password' => 'admin1234'],
-            ['name' => 'Rinaldo', 'email' => 'Rinaldo@admin.com', 'password' => '123456'],
+        $users = [
+            ['name' => 'Santy', 'email' => 'santy19abasto@gmail.com', 'password' => 'admin123', 'rol' => 'super_admin'],
+            ['name' => 'Deimar', 'email' => 'deimaralexr@gmail.com', 'password' => 'admin1234', 'rol' => 'admin'],
+            ['name' => 'Rinaldo', 'email' => 'rinaldo@admin.com', 'password' => '123456', 'rol' => 'admin'],
         ];
 
-        foreach ($admins as $admin) {
+        foreach ($users as $data) {
             User::updateOrCreate(
-                ['email' => $admin['email']],
+                ['email' => $data['email']],
                 [
-                    'name' => $admin['name'],
-                    'password' => Hash::make($admin['password']),
-                    'rol' => 'admin',
+                    'name' => $data['name'],
+                    'password' => Hash::make($data['password']),
+                    'rol' => $data['rol'],
                 ]
             );
         }

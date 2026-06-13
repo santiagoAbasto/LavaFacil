@@ -1,69 +1,98 @@
 import { Head } from '@inertiajs/react';
-import { Bar, Doughnut } from 'react-chartjs-2';
-import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, ArcElement, Tooltip, Legend } from 'chart.js';
+import { useEffect, useRef } from 'react';
+import { Chart, DoughnutController, ArcElement, BarController, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js';
+import DashboardLayout from '@/Layouts/DashboardLayout';
 
-ChartJS.register(BarElement, CategoryScale, LinearScale, ArcElement, Tooltip, Legend);
+Chart.register(DoughnutController, ArcElement, BarController, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 export default function Reportes({ pedidosPorEstado, pedidosPorDia }) {
-    const estados = Object.keys(pedidosPorEstado);
-    const cantidades = Object.values(pedidosPorEstado);
+    const donutRef = useRef(null);
+    const barRef = useRef(null);
+    const donutChart = useRef(null);
+    const barChart = useRef(null);
 
-    const dias = pedidosPorDia.map(p => p.dia);
-    const pedidosDia = pedidosPorDia.map(p => p.total);
+    useEffect(() => {
+        if (donutRef.current) {
+            if (donutChart.current) donutChart.current.destroy();
+            const ctx = donutRef.current.getContext('2d');
+            if (!ctx) return;
+            donutChart.current = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Pendientes', 'En Proceso', 'Entregados'],
+                    datasets: [{
+                        data: [
+                            pedidosPorEstado?.pendiente || 0,
+                            pedidosPorEstado?.en_proceso || 0,
+                            pedidosPorEstado?.entregado || 0,
+                        ],
+                        backgroundColor: ['oklch(0.55 0.16 85)', 'oklch(0.55 0.19 248)', 'oklch(0.55 0.17 150)'],
+                        borderWidth: 0,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true } } },
+                    cutout: '70%',
+                },
+            });
+        }
+
+        if (barRef.current) {
+            if (barChart.current) barChart.current.destroy();
+            const ctx = barRef.current.getContext('2d');
+            if (!ctx) return;
+            const labels = pedidosPorDia?.map(d => d.dia) || [];
+            const valores = pedidosPorDia?.map(d => d.total) || [];
+            barChart.current = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Pedidos',
+                        data: valores,
+                        backgroundColor: 'oklch(0.55 0.19 248 / 0.7)',
+                        borderColor: 'oklch(0.55 0.19 248)',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'oklch(0 0 0 / 0.06)' } },
+                        x: { grid: { display: false } },
+                    },
+                },
+            });
+        }
+
+        return () => {
+            if (donutChart.current) donutChart.current.destroy();
+            if (barChart.current) barChart.current.destroy();
+        };
+    }, [pedidosPorEstado, pedidosPorDia]);
 
     return (
-        <div className="p-8 max-w-7xl mx-auto">
-            <Head title="Reportes y Gráficos" />
+        <DashboardLayout title="Reportes">
+            <Head title="Reportes" />
 
-            <div className="mb-10 text-center">
-                <h1 className="text-5xl font-extrabold text-zinc-800 dark:text-white mb-4">
-                    Reportes de Pedidos
-                </h1>
-                <p className="text-zinc-600 dark:text-zinc-400 text-lg">
-                    Visualiza el comportamiento de los pedidos realizados.
-                </p>
-            </div>
-
-            {/* Gráficos */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Pedidos por Estado */}
-                <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md border border-zinc-200 dark:border-zinc-700 p-6 rounded-2xl shadow-md">
-                    <h2 className="text-xl font-bold text-indigo-600 dark:text-indigo-400 text-center mb-4">
-                        Pedidos por Estado
-                    </h2>
-                    <Doughnut
-                        data={{
-                            labels: estados,
-                            datasets: [{
-                                data: cantidades,
-                                backgroundColor: ['#60a5fa', '#facc15', '#34d399'],
-                            }]
-                        }}
-                    />
+            <div className="grid gap-6 md:grid-cols-2">
+                <div className="card">
+                    <h3 className="text-lg font-semibold text-[var(--color-ink)] mb-4">Distribución de Pedidos</h3>
+                    <div className="aspect-square max-w-sm mx-auto">
+                        <canvas ref={donutRef} />
+                    </div>
                 </div>
 
-                {/* Pedidos por Día */}
-                <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md border border-zinc-200 dark:border-zinc-700 p-6 rounded-2xl shadow-md">
-                    <h2 className="text-xl font-bold text-indigo-600 dark:text-indigo-400 text-center mb-4">
-                        Pedidos por Día
-                    </h2>
-                    <Bar
-                        data={{
-                            labels: dias,
-                            datasets: [{
-                                label: 'Pedidos',
-                                data: pedidosDia,
-                                backgroundColor: '#6366f1',
-                            }]
-                        }}
-                        options={{
-                            scales: {
-                                y: { beginAtZero: true }
-                            }
-                        }}
-                    />
+                <div className="card">
+                    <h3 className="text-lg font-semibold text-[var(--color-ink)] mb-4">Pedidos por Día</h3>
+                    <div>
+                        <canvas ref={barRef} />
+                    </div>
                 </div>
             </div>
-        </div>
+        </DashboardLayout>
     );
 }

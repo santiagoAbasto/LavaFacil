@@ -1,13 +1,13 @@
 import Checkbox from '@/Components/Checkbox';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { motion } from 'framer-motion';
 
 export default function Login({ status, canResetPassword }) {
-    const { data, setData, post, processing, errors, reset, setError, clearErrors } = useForm({
+    const { data, setData, post, processing, errors, reset } = useForm({
         email: '',
         password: '',
         remember: false,
@@ -15,47 +15,25 @@ export default function Login({ status, canResetPassword }) {
 
     const submit = (e) => {
         e.preventDefault();
-        post(route('login'), {
-            onFinish: () => reset('password'),
-        });
-    };
-
-    const validateEmail = (value) => {
-        if (!value.includes('@')) {
-            setError('email', 'Ingresa un correo electrónico válido.');
-        } else {
-            clearErrors('email');
-        }
-        setData('email', value);
-    };
-
-    const validatePassword = (value) => {
-        if (value.length < 6) {
-            setError('password', 'La contraseña debe tener al menos 6 caracteres.');
-        } else {
-            clearErrors('password');
-        }
-        setData('password', value);
+        post(route('login'), { onFinish: () => reset('password') });
     };
 
     return (
         <GuestLayout>
-            <Head title="Iniciar sesión - LavaFácil" />
+            <Head title="Iniciar sesión" />
 
-            <div className="flex flex-col items-center mb-8">
-                <h1 className="text-2xl font-bold text-gray-800">Bienvenido a LavaFácil</h1>
-                <p className="text-gray-500 text-sm mt-1">Inicia sesión para continuar</p>
+            <div className="text-center mb-8">
+                <h1 className="text-2xl font-bold text-[var(--color-ink)]">Bienvenido</h1>
+                <p className="text-sm text-[var(--color-muted)] mt-1">Inicia sesión para continuar</p>
             </div>
 
-            {/* Estado de sesión */}
             {status && (
-                <div className="mb-4 text-sm font-medium text-green-600">
+                <div className="mb-6 px-4 py-3 rounded-lg bg-[var(--color-success)]/10 border border-[var(--color-success)]/20 text-sm text-[var(--color-success)] text-center">
                     {status}
                 </div>
             )}
 
-            <form onSubmit={submit} className="space-y-6">
-                {/* Email */}
+            <form onSubmit={submit} className="space-y-5">
                 <div>
                     <InputLabel htmlFor="email" value="Correo electrónico" />
                     <TextInput
@@ -63,15 +41,15 @@ export default function Login({ status, canResetPassword }) {
                         type="email"
                         name="email"
                         value={data.email}
-                        className={`mt-1 block w-full ${errors.email ? 'border-red-500' : ''}`}
+                        className="mt-1.5"
+                        hasError={!!errors.email}
                         autoComplete="username"
                         isFocused
-                        onChange={(e) => validateEmail(e.target.value)}
+                        onChange={(e) => setData('email', e.target.value)}
                     />
-                    <InputError message={errors.email} className="mt-2" />
+                    <InputError message={errors.email} className="mt-1.5" />
                 </div>
 
-                {/* Password */}
                 <div>
                     <InputLabel htmlFor="password" value="Contraseña" />
                     <TextInput
@@ -79,51 +57,50 @@ export default function Login({ status, canResetPassword }) {
                         type="password"
                         name="password"
                         value={data.password}
-                        className={`mt-1 block w-full ${errors.password ? 'border-red-500' : ''}`}
+                        className="mt-1.5"
+                        hasError={!!errors.password}
                         autoComplete="current-password"
-                        onChange={(e) => validatePassword(e.target.value)}
+                        onChange={(e) => setData('password', e.target.value)}
                     />
-                    <InputError message={errors.password} className="mt-2" />
+                    <InputError message={errors.password} className="mt-1.5" />
                 </div>
 
-                {/* Recordarme */}
                 <div className="flex items-center">
                     <Checkbox
                         name="remember"
                         checked={data.remember}
                         onChange={(e) => setData('remember', e.target.checked)}
                     />
-                    <span className="ms-2 text-sm text-gray-600">
-                        Recordarme
-                    </span>
+                    <span className="ml-2 text-sm text-[var(--color-muted)]">Recordarme</span>
                 </div>
 
-                {/* Botones */}
-                <div className="flex flex-col gap-4 mt-6">
-                    <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-4">
+                    <motion.button
+                        type="submit"
+                        className="btn-primary w-full"
+                        disabled={processing}
+                        whileTap={{ scale: 0.97 }}
+                    >
+                        {processing ? 'Iniciando sesión…' : 'Iniciar sesión'}
+                    </motion.button>
+
+                    <div className="flex items-center justify-between text-sm">
                         {canResetPassword && (
                             <Link
                                 href={route('password.request')}
-                                className="text-sm text-blue-600 hover:underline"
+                                className="text-[var(--color-primary)] hover:underline font-medium"
                             >
                                 ¿Olvidaste tu contraseña?
                             </Link>
-
                         )}
-                        <PrimaryButton className="ms-4" disabled={processing}>
-                            Iniciar sesión
-                        </PrimaryButton>
                     </div>
 
-                    {/* Agregamos abajo el link de registro */}
-                    <div className="text-center">
-                        <Link
-                            href={route('register')}
-                            className="text-sm text-gray-600 underline hover:text-gray-900"
-                        >
-                            ¿No tienes una cuenta? Regístrate
+                    <p className="text-center text-sm text-[var(--color-muted)]">
+                        ¿No tienes una cuenta?{' '}
+                        <Link href={route('register')} className="text-[var(--color-primary)] hover:underline font-medium">
+                            Regístrate
                         </Link>
-                    </div>
+                    </p>
                 </div>
             </form>
         </GuestLayout>

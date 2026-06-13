@@ -1,44 +1,30 @@
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, useForm } from '@inertiajs/react';
+import { motion } from 'framer-motion';
 
 export default function ConfirmPassword() {
-    const { data, setData, post, processing, errors, reset, setError, clearErrors } = useForm({
-        password: '',
-    });
+    const { data, setData, post, processing, errors } = useForm({ password: '' });
 
     const submit = (e) => {
         e.preventDefault();
-        post(route('password.confirm'), {
-            onFinish: () => reset('password'),
-        });
-    };
-
-    // Validación en tiempo real para contraseña
-    const validatePassword = (value) => {
-        if (value.length < 8) {
-            setError('password', 'La contraseña debe tener al menos 8 caracteres.');
-        } else {
-            clearErrors('password');
-        }
-        setData('password', value);
+        post(route('password.confirm'));
     };
 
     return (
         <GuestLayout>
             <Head title="Confirmar contraseña" />
 
-            <div className="mb-6 text-center">
-                <h1 className="text-2xl font-bold text-gray-800">Confirma tu contraseña</h1>
-                <p className="mt-2 text-gray-600 text-sm">
+            <div className="text-center mb-8">
+                <h1 className="text-2xl font-bold text-[var(--color-ink)]">Confirma tu contraseña</h1>
+                <p className="text-sm text-[var(--color-muted)] mt-2">
                     Por seguridad, confirma tu contraseña antes de continuar.
                 </p>
             </div>
 
-            <form onSubmit={submit} className="space-y-6">
+            <form onSubmit={submit} className="space-y-5">
                 <div>
                     <InputLabel htmlFor="password" value="Contraseña" />
                     <TextInput
@@ -46,22 +32,25 @@ export default function ConfirmPassword() {
                         type="password"
                         name="password"
                         value={data.password}
-                        className={`mt-1 block w-full ${errors.password ? 'border-red-500' : ''}`}
+                        className="mt-1.5"
+                        hasError={!!errors.password}
                         isFocused
-                        onChange={(e) => validatePassword(e.target.value)}
+                        onChange={(e) => setData('password', e.target.value)}
                         autoComplete="current-password"
                         required
                     />
-                    <InputError message={errors.password} className="mt-2" />
+                    <InputError message={errors.password} className="mt-1.5" />
                 </div>
 
-                <div className="flex items-center justify-end">
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Confirmar
-                    </PrimaryButton>
-                </div>
+                <motion.button
+                    type="submit"
+                    className="btn-primary w-full"
+                    disabled={processing}
+                    whileTap={{ scale: 0.97 }}
+                >
+                    {processing ? 'Confirmando…' : 'Confirmar'}
+                </motion.button>
             </form>
         </GuestLayout>
     );
 }
-

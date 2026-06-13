@@ -4,17 +4,15 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pedido;
+use App\Models\Pago;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 
 class PedidoController extends Controller
 {
-    /**
-     * Mostrar todos los pedidos, con opción de filtrar por estado.
-     */
     public function index(Request $request)
     {
-        $estado = $request->input('estado'); // obtener el filtro desde la URL (?estado=...)
+        $estado = $request->input('estado');
 
         $query = Pedido::with('cliente', 'detallePedidos.servicio', 'pago')
             ->orderBy('created_at', 'desc');
@@ -31,23 +29,45 @@ class PedidoController extends Controller
         ]);
     }
 
-    /**
-     * Actualizar el estado de un pedido.
-     */
-    public function actualizarEstado($id)
+    public function actualizarEstado(Request $request, $id)
     {
         $pedido = Pedido::findOrFail($id);
 
-        // Lógica: pendiente -> en_proceso -> entregado
-        if ($pedido->estado === 'pendiente') {
-            $pedido->estado = 'en_proceso';
-        } elseif ($pedido->estado === 'en_proceso') {
-            $pedido->estado = 'entregado';
-        }
+        $transiciones = [
+            'pendiente' => 'en_proceso',
+            'en_proceso' => 'entregado',
+        ];
 
-        $pedido->save();
+        if (isset($transiciones[$pedido->estado])) {
+            $nuevoEstado = $transiciones[$pedido->estado];
+            $pedido->estado = $nuevoEstado;
+
+            if ($nuevoEstado === 'entregado') {
+                $pedido->fecha_entrega = now();
+            }
+
+            $pedido->save();
+        }
 
         return redirect()->route('admin.pedidos')->with('success', 'Estado del pedido actualizado.');
     }
-}
 
+    public function registrarPago(Request $request, $id)
+    {
+        $request->validate([
+            'metodo' => 'required|in:efectivo,qr,transferencia',
+            'monto' => 'required|numeric|min:1',
+        ]);
+
+        $pedido = Pedido::findOrFail($id);
+
+        Pago::create([
+            'pedido_id' => $pedido->id,
+            'metodo' => $request->metodo,
+            'monto' => $request->monto,
+            'confirmado' => true,
+        ]);
+
+        return redirect()->route('admin.pedidos')->with('success', 'Pago registrado correctamente.');
+    }
+}

@@ -1,170 +1,161 @@
-import { useForm, Head } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
-import Swal from 'sweetalert2';
-import { motion } from 'framer-motion'; // 🎯 Importamos Framer Motion para animaciones
+import { Head, useForm } from '@inertiajs/react';
+import { motion } from 'framer-motion';
+import DashboardLayout from '@/Layouts/DashboardLayout';
+import InputLabel from '@/Components/InputLabel';
+import InputError from '@/Components/InputError';
 
 export default function CrearPedido({ servicios }) {
-    const { data, setData, post, processing, errors, reset } = useForm({
+    const { data, setData, post, processing, errors } = useForm({
+        servicio_id: '',
+        cantidad: 1,
         fecha_recojo: '',
-        servicios: [],
-        metodo_pago: '',
-        monto: '',
+        hora_recojo: '',
+        direccion_recojo: '',
+        notas: '',
     });
 
-    const [montoCalculado, setMontoCalculado] = useState(0);
+    const servicioSeleccionado = servicios?.find(s => s.id == data.servicio_id);
+    const precioTotal = servicioSeleccionado ? servicioSeleccionado.precio * data.cantidad : 0;
 
-    const toggleServicio = (id, cantidad = 1) => {
-        const existe = data.servicios.find(s => s.id === id);
-        if (existe) {
-            setData('servicios', data.servicios.filter(s => s.id !== id));
-        } else {
-            setData('servicios', [...data.servicios, { id, cantidad }]);
-        }
-    };
-
-    const actualizarCantidad = (id, nuevaCantidad) => {
-        setData('servicios', data.servicios.map(s => 
-            s.id === id ? { ...s, cantidad: nuevaCantidad } : s
-        ));
-    };
-
-    const handleSubmit = (e) => {
+    const submit = (e) => {
         e.preventDefault();
-        post(route('cliente.pedido.store'), {
-            onSuccess: () => {
-                Swal.fire({
-                    title: '✅ Pedido registrado',
-                    text: 'Tu pedido fue registrado exitosamente.',
-                    icon: 'success',
-                    confirmButtonColor: '#6366f1', // Indigo elegante
-                    background: '#f9fafb',
-                    color: '#374151',
-                    timer: 2000,
-                    showConfirmButton: false,
-                });
-                reset();
-            }
-        });
+        post(route('cliente.pedido.store'));
     };
-
-    useEffect(() => {
-        let total = 0;
-        for (const servicioSeleccionado of data.servicios) {
-            const servicioInfo = servicios.find(s => s.id === servicioSeleccionado.id);
-            if (servicioInfo) {
-                total += servicioInfo.precio * servicioSeleccionado.cantidad;
-            }
-        }
-        setMontoCalculado(total);
-        setData('monto', total);
-    }, [data.servicios, servicios]);
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="p-8 max-w-4xl mx-auto"
-        >
+        <DashboardLayout title="Crear Pedido">
             <Head title="Crear Pedido" />
 
-            <div className="mb-8 text-center">
-                <h1 className="text-4xl font-extrabold text-zinc-800 dark:text-white mb-2">Crear Pedido</h1>
-                <p className="text-zinc-500 dark:text-zinc-400">
-                    Completa el formulario para registrar tu pedido.
-                </p>
-            </div>
+            <div className="max-w-2xl mx-auto">
+                <form onSubmit={submit} className="space-y-6">
+                    <motion.div
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                        className="card"
+                    >
+                        <h3 className="text-lg font-semibold text-[var(--color-ink)] mb-5">Servicio</h3>
 
-            <form onSubmit={handleSubmit} className="space-y-8 bg-white/70 dark:bg-zinc-900/60 backdrop-blur-md p-8 rounded-3xl shadow-lg border border-zinc-200 dark:border-zinc-700 transition-all">
-                
-                {/* Fecha de recojo */}
-                <div className="space-y-2">
-                    <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-300">Fecha de Recojo:</label>
-                    <input
-                        type="date"
-                        className="w-full py-2 px-4 rounded-lg bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 focus:ring-2 focus:ring-indigo-400 focus:outline-none transition"
-                        value={data.fecha_recojo}
-                        onChange={(e) => setData('fecha_recojo', e.target.value)}
-                    />
-                    {errors.fecha_recojo && (
-                        <p className="text-red-500 text-sm">{errors.fecha_recojo}</p>
-                    )}
-                </div>
-
-                {/* Servicios */}
-                <div className="space-y-4">
-                    <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-200">Selecciona los Servicios:</h2>
-                    <div className="space-y-3">
-                        {servicios.map(servicio => (
-                            <div key={servicio.id} className="flex items-center gap-4">
-                                <input
-                                    type="checkbox"
-                                    checked={data.servicios.some(s => s.id === servicio.id)}
-                                    onChange={() => toggleServicio(servicio.id)}
-                                    className="rounded text-indigo-600 focus:ring-indigo-400"
-                                />
-                                <span className="text-zinc-700 dark:text-zinc-300">{servicio.nombre} - Bs {servicio.precio}</span>
-
-                                {data.servicios.some(s => s.id === servicio.id) && (
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        className="w-20 py-1 px-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-center"
-                                        value={data.servicios.find(s => s.id === servicio.id)?.cantidad || 1}
-                                        onChange={(e) => actualizarCantidad(servicio.id, parseInt(e.target.value))}
-                                    />
-                                )}
+                        <div className="space-y-5">
+                            <div>
+                                <InputLabel htmlFor="servicio_id" value="Tipo de servicio" />
+                                <select
+                                    id="servicio_id"
+                                    value={data.servicio_id}
+                                    onChange={(e) => setData('servicio_id', e.target.value)}
+                                    className="select-field mt-1.5"
+                                    required
+                                >
+                                    <option value="">Selecciona un servicio</option>
+                                    {servicios?.map(s => (
+                                        <option key={s.id} value={s.id}>
+                                            {s.nombre} — Bs {s.precio}
+                                        </option>
+                                    ))}
+                                </select>
+                                <InputError message={errors.servicio_id} className="mt-1.5" />
                             </div>
-                        ))}
-                    </div>
-                    {errors.servicios && (
-                        <p className="text-red-500 text-sm">{errors.servicios}</p>
-                    )}
-                </div>
 
-                {/* Método de pago */}
-                <div className="space-y-2">
-                    <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-300">Método de Pago:</label>
-                    <select
-                        value={data.metodo_pago}
-                        onChange={(e) => setData('metodo_pago', e.target.value)}
-                        className="w-full py-2 px-4 rounded-lg bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 focus:ring-2 focus:ring-indigo-400 focus:outline-none transition"
+                            <div>
+                                <InputLabel htmlFor="cantidad" value="Cantidad (kg)" />
+                                <input
+                                    id="cantidad"
+                                    type="number"
+                                    min="1"
+                                    value={data.cantidad}
+                                    onChange={(e) => setData('cantidad', e.target.value)}
+                                    className="input-field mt-1.5"
+                                    required
+                                />
+                                <InputError message={errors.cantidad} className="mt-1.5" />
+                            </div>
+
+                            {precioTotal > 0 && (
+                                <div className="px-4 py-3 rounded-lg bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/10 flex items-center justify-between">
+                                    <span className="text-sm font-medium text-[var(--color-ink)]">Precio estimado</span>
+                                    <span className="text-xl font-bold text-[var(--color-primary)]">Bs {precioTotal}</span>
+                                </div>
+                            )}
+                        </div>
+                    </motion.div>
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1, duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                        className="card"
                     >
-                        <option value="">-- Selecciona método --</option>
-                        <option value="efectivo">Efectivo</option>
-                        <option value="qr">QR</option>
-                        <option value="transferencia">Transferencia</option>
-                    </select>
-                    {errors.metodo_pago && (
-                        <p className="text-red-500 text-sm">{errors.metodo_pago}</p>
-                    )}
-                </div>
+                        <h3 className="text-lg font-semibold text-[var(--color-ink)] mb-5">Recojo</h3>
 
-                {/* Monto a pagar */}
-                <div className="space-y-2">
-                    <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-300">Monto a pagar:</label>
-                    <input
-                        type="number"
-                        value={montoCalculado}
-                        disabled
-                        className="w-full py-2 px-4 rounded-lg bg-gray-100 dark:bg-zinc-700 text-zinc-700 dark:text-white border border-zinc-300 dark:border-zinc-700 text-center"
-                    />
-                </div>
+                        <div className="grid gap-5 sm:grid-cols-2">
+                            <div>
+                                <InputLabel htmlFor="fecha_recojo" value="Fecha" />
+                                <input
+                                    id="fecha_recojo"
+                                    type="date"
+                                    value={data.fecha_recojo}
+                                    onChange={(e) => setData('fecha_recojo', e.target.value)}
+                                    className="input-field mt-1.5"
+                                    required
+                                />
+                                <InputError message={errors.fecha_recojo} className="mt-1.5" />
+                            </div>
 
-                {/* Botón enviar */}
-                <div className="flex justify-end">
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        type="submit"
-                        disabled={processing}
-                        className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition disabled:opacity-50"
+                            <div>
+                                <InputLabel htmlFor="hora_recojo" value="Hora" />
+                                <input
+                                    id="hora_recojo"
+                                    type="time"
+                                    value={data.hora_recojo}
+                                    onChange={(e) => setData('hora_recojo', e.target.value)}
+                                    className="input-field mt-1.5"
+                                />
+                                <InputError message={errors.hora_recojo} className="mt-1.5" />
+                            </div>
+                        </div>
+
+                        <div className="mt-5">
+                            <InputLabel htmlFor="direccion_recojo" value="Dirección de recojo" />
+                            <input
+                                id="direccion_recojo"
+                                type="text"
+                                value={data.direccion_recojo}
+                                onChange={(e) => setData('direccion_recojo', e.target.value)}
+                                className="input-field mt-1.5"
+                                placeholder="Calle, número, referencia"
+                                required
+                            />
+                            <InputError message={errors.direccion_recojo} className="mt-1.5" />
+                        </div>
+
+                        <div className="mt-5">
+                            <InputLabel htmlFor="notas" value="Notas (opcional)" />
+                            <textarea
+                                id="notas"
+                                value={data.notas}
+                                onChange={(e) => setData('notas', e.target.value)}
+                                className="input-field mt-1.5 min-h-[80px] resize-y"
+                                placeholder="Instrucciones especiales, tipo de tela, etc."
+                            />
+                            <InputError message={errors.notas} className="mt-1.5" />
+                        </div>
+                    </motion.div>
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2, duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                        className="flex justify-end gap-3"
                     >
-                        {processing ? 'Registrando...' : 'Confirmar Pedido'}
-                    </motion.button>
-                </div>
-
-            </form>
-        </motion.div>
+                        <a href={route('cliente.pedidos')} className="btn-secondary">
+                            Cancelar
+                        </a>
+                        <button type="submit" disabled={processing} className="btn-primary">
+                            {processing ? 'Creando…' : 'Crear Pedido'}
+                        </button>
+                    </motion.div>
+                </form>
+            </div>
+        </DashboardLayout>
     );
 }

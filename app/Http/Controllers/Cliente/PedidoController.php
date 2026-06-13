@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Servicio;
 use App\Models\Pedido;
 use App\Models\DetallePedido;
-use App\Models\Pago;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
@@ -26,54 +25,42 @@ class PedidoController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'servicio_id' => 'required|integer|exists:servicios,id',
+            'cantidad' => 'required|integer|min:1',
             'fecha_recojo' => 'required|date',
-            'servicios' => 'required|array|min:1',
-            'servicios.*.id' => 'required|integer|exists:servicios,id',
-            'servicios.*.cantidad' => 'required|integer|min:1',
-            'metodo_pago' => 'required|in:efectivo,qr,transferencia',
-            'monto' => 'required|numeric|min:1',
+            'hora_recojo' => 'nullable|string|max:10',
+            'direccion_recojo' => 'required|string|max:255',
+            'notas' => 'nullable|string|max:500',
         ]);
 
         DB::transaction(function () use ($request) {
+            $servicio = Servicio::findOrFail($request->servicio_id);
+            $subtotal = $servicio->precio * $request->cantidad;
+
             $pedido = Pedido::create([
                 'user_id' => Auth::id(),
                 'estado' => 'pendiente',
                 'fecha_recojo' => $request->fecha_recojo,
-                'total' => 0, // provisional, se actualizará luego
+                'hora_recojo' => $request->hora_recojo,
+                'direccion_recojo' => $request->direccion_recojo,
+                'notas' => $request->notas,
+                'total' => $subtotal,
             ]);
 
-            $total = 0;
-
-            foreach ($request->servicios as $s) {
-                $servicio = Servicio::find($s['id']);
-                $subtotal = $servicio->precio * $s['cantidad'];
-                $total += $subtotal;
-
-                DetallePedido::create([
-                    'pedido_id' => $pedido->id,
-                    'servicio_id' => $servicio->id,
-                    'cantidad' => $s['cantidad'],
-                    'subtotal' => $subtotal,
-                ]);
-            }
-
-            $pedido->update(['total' => $total]);
-
-            // Registrar el pago
-            Pago::create([
+            DetallePedido::create([
                 'pedido_id' => $pedido->id,
-                'metodo' => $request->metodo_pago,
-                'monto' => $request->monto,
-                'confirmado' => true,
+                'servicio_id' => $servicio->id,
+                'cantidad' => $request->cantidad,
+                'subtotal' => $subtotal,
             ]);
         });
 
-        return redirect()->route('cliente.servicios')->with('success', 'Pedido y pago registrados correctamente.');
+        return redirect()->route('cliente.pedidos')->with('success', 'Pedido creado correctamente.');
     }
 
     public function index()
     {
-        $pedidos = Pedido::with('detallePedidos.servicio', 'pago')
+        $pedidos = Pedido::with('detallePedidos.servicio')
             ->where('user_id', Auth::id())
             ->orderBy('created_at', 'desc')
             ->get();
